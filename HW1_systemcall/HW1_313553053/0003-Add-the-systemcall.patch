@@ -1,0 +1,95 @@
+From 81290dbf91792bf2c4604049000cef1d7cd78dd8 Mon Sep 17 00:00:00 2001
+From: cwkang <wei020789@gmail.com>
+Date: Fri, 27 Sep 2024 20:46:31 +0800
+Subject: [PATCH 3/3] Add the systemcall
+
+---
+ Makefile                               |  2 +-
+ arch/x86/entry/syscalls/syscall_64.tbl |  1 +
+ include/linux/syscalls.h               |  1 +
+ revstr/Makefile                        |  1 +
+ revstr/revstr.c                        | 29 ++++++++++++++++++++++++++
+ 5 files changed, 33 insertions(+), 1 deletion(-)
+ create mode 100644 revstr/Makefile
+ create mode 100644 revstr/revstr.c
+
+diff --git a/Makefile b/Makefile
+index 7b1cf5e4a..fdb0407d5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -743,7 +743,7 @@ endif
+ 
+ ifeq ($(KBUILD_EXTMOD),)
+ # Objects we will link into vmlinux / subdirs we need to visit
+-core-y		:=
++core-y		:= revstr/
+ drivers-y	:=
+ libs-y		:= lib/
+ endif # KBUILD_EXTMOD
+diff --git a/arch/x86/entry/syscalls/syscall_64.tbl b/arch/x86/entry/syscalls/syscall_64.tbl
+index c84d12608..c1dc8239f 100644
+--- a/arch/x86/entry/syscalls/syscall_64.tbl
++++ b/arch/x86/entry/syscalls/syscall_64.tbl
+@@ -372,6 +372,7 @@
+ 448	common	process_mrelease	sys_process_mrelease
+ 449	common	futex_waitv		sys_futex_waitv
+ 450	common	set_mempolicy_home_node	sys_set_mempolicy_home_node
++451	common	revstr			sys_revstr
+ 
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+diff --git a/include/linux/syscalls.h b/include/linux/syscalls.h
+index a34b0f9a9..84a8415d0 100644
+--- a/include/linux/syscalls.h
++++ b/include/linux/syscalls.h
+@@ -1385,4 +1385,5 @@ int __sys_getsockopt(int fd, int level, int optname, char __user *optval,
+ 		int __user *optlen);
+ int __sys_setsockopt(int fd, int level, int optname, char __user *optval,
+ 		int optlen);
++asmlinkage long sys_revstr(char __user* src, size_t len);
+ #endif
+diff --git a/revstr/Makefile b/revstr/Makefile
+new file mode 100644
+index 000000000..d44989899
+--- /dev/null
++++ b/revstr/Makefile
+@@ -0,0 +1 @@
++obj-y := revstr.o 
+diff --git a/revstr/revstr.c b/revstr/revstr.c
+new file mode 100644
+index 000000000..8f5fe40e9
+--- /dev/null
++++ b/revstr/revstr.c
+@@ -0,0 +1,29 @@
++#include <linux/kernel.h>
++#include <linux/linkage.h>
++#include <linux/syscalls.h>
++#include <linux/uaccess.h>  
++
++SYSCALL_DEFINE2(revstr, char __user *, src, size_t, len) {
++	char str[256] = {0};
++	char rev_str[256] = {0};
++
++	if(copy_from_user(str, src, len)){
++		return -EFAULT;
++	}
++
++	str[len] = '\0';
++	rev_str[len] = '\0';
++
++	printk("The origin string: %s\n", str);
++
++	for(int i = 0; i < len; i++){
++		rev_str[len - i -1] = str[i];
++	}
++	printk("The reversed string: %s\n", rev_str);
++
++	if(copy_to_user(src, rev_str, len+1)){
++		return -EFAULT;
++	}
++	return 0;
++}
++
+-- 
+2.43.0
+

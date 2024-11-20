@@ -1,0 +1,26 @@
+From cd20b4d24b0384a55e205f6ef9ebdcb43745412f Mon Sep 17 00:00:00 2001
+From: cwkang <wei020789@gmail.com>
+Date: Thu, 26 Sep 2024 00:09:54 +0800
+Subject: [PATCH 2/3] not diplay the suffix +
+
+---
+ scripts/setlocalversion | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/setlocalversion b/scripts/setlocalversion
+index af4754a35..afcc64d9e 100755
+--- a/scripts/setlocalversion
++++ b/scripts/setlocalversion
+@@ -139,7 +139,8 @@ elif [ "${LOCALVERSION+set}" != "set" ]; then
+ 	# If the variable LOCALVERSION is set (including being set
+ 	# to an empty string), we don't want to append a plus sign.
+ 	scm=$(scm_version --short)
+-	res="$res${scm:++}"
++	# res="$res${scm:++}"
++	res="$res${scm:+}"
+ fi
+ 
+ echo "$res"
+-- 
+2.43.0
+
