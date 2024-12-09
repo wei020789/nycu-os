@@ -120,7 +120,7 @@ static ssize_t kfetch_read(struct file *filp, char __user *buffer, size_t length
 
     // CPUs
     if (mask & KFETCH_NUM_CPUS) {
-        bytes_read += snprintf(msg + bytes_read, BUF_LEN - bytes_read, "%sCPUs:\t%d / %d\n", logo[count++], num_online_cpus(), num_possible_cpus());
+        bytes_read += snprintf(msg + bytes_read, BUF_LEN - bytes_read, "%sCPUs:\t%d / %d\n", logo[count++], num_online_cpus(), num_active_cpus());
     }
 
     // Mem
